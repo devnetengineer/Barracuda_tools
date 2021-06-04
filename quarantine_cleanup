@@ -1,0 +1,47 @@
+If the customer is experiencing the following symptoms:
+
+-certain user level settings are not being honored
+-end-users are seeing old quarantine messages, that date way past the globally set configured retention policy
+
+This may be due to the unit being out of spec and certain configurations are starting to break due to conflicting policies.
+
+1. Check for the number of users
+
+1123300@100.69.8.110 ~ # mysql
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 235406 to server version: 5.0.21
+Type 'help;' or '\h' for help. Type '\c' to clear the buffer.
+
+mysql> use config;
+Database changed
+mysql> select count(distinct scope_data) from config where scope = 'user';
++----------------------------+
+| count(distinct scope_data) |
++----------------------------+
+|                     102286 | 
++----------------------------+
+1 row in set (0.00 sec)
+mysql>
+
+This is critical because each Model software are spec-ced to filter a range of users. Because the appliances are not 
+intended to be used as archiving service, the OS will automatically regulate the disk size to hit below 75% if it goes over.
+Having too many users may fill up the disk space too fast, which may result in corruption that will cause the old messages
+not to be deleted from the Quarantine inboxes and the old settings are used, despite the newly configured policy.
+
+You can check the version using the following command:
+
+1123300@100.69.8.110 ~ # version.pl | grep -i model
+model: AWSX00
+
+2. You can delete the old quarantine messages by exporting the userlist from Mysql to a TXT file, then running a for-loop 
+bash script to locate the user's quarantine inbox and delete messages that are old.
+
+1123300@100.69.8.110 ~ # # mysql -e "select distinct scope_data from config.config where scope ='user'" > /tmp/example10.txt
+
+ for user in `cat example10.txt` ; do find /mail/message_log/messages/$user/q/* -mtime +30 -exec ls -l {} \; ; done
+ -This is to check the absolute paths specified in the command are valid
+ 
+ for user in `cat example10.txt` ; do find /mail/message_log/messages/$user/q/* -mtime +30 -exec rm -rf {} \; ; done
+ -This is to actually remove the old message (as indicated by the "-exec rm -rf")
+ 
+ **This for-loop will iterate as many times necessary and depending on the number of users, it may take a few hours
