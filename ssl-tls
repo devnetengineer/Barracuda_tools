@@ -1,0 +1,52 @@
+For mail delivery, often SSL/TLS protocol is used for secure transmission. Any issues you may encounter could be that the
+server itself does not support STARTTLS, a valid certificate is not configured, or the certificate is mis-configured.
+
+You can check to see if the server supports STARTTLS by doing a telnet connection and sending a EHLO:
+
+1123300@100.69.8.110 ~ # telnet d205928b.ess.barracudanetworks.com 25
+Trying 209.222.82.253...
+Connected to mail.ess.barracuda.com (209.222.82.253).
+Escape character is '^]'.
+220 mail.ess.barracuda.com ESMTP (mx-inbound16-125.us-east-2b.ess.aws)
+ehlo me.com
+250-mx-inbound16-125.us-east-2b.ess.aws.cudaops.com Hello egress.ess.barracudanetworks.com [209.222.82.4], pleased to meet you
+250-STARTTLS
+250-PIPELINING
+250-8BITMIME
+250 HELP
+
+
+At times you will see:
+
+220**************
+
+This is when Cisco firewalls have ESMPT inspection enabled and can cause issues with mail delivery****
+
+
+Openssl can be used to check for the certificate of the server on the specified port, and openssl can also be used to send an email on the CLI, over SSL/TLS. 
+
+1123300@100.69.8.110 ~ # openssl s_client -connect localhost:25 -starttls smtp -crlf -showcerts
+CONNECTED(00000003)
+Can't use SSL_get_servername
+depth=0 C = US, ST = California, L = Campbell, O = Barracuda Networks, OU = Engineering, CN = Barracuda/emailAddress=sales@barracuda.com
+verify error:num=18:self signed certificate
+verify return:1
+depth=0 C = US, ST = California, L = Campbell, O = Barracuda Networks, OU = Engineering, CN = Barracuda/emailAddress=sales@barracuda.com
+verify return:1
+
+
+Openssl can be used to specify a certain TLS version to test or even to send an actual email, using SSL/TLS:
+*The certificate information has been omitted to save space:
+
+---
+250 HELP
+mail from:<test@barracuda.com>
+250 Sender <test@barracuda.com> OK
+rcpt to:<jason@yootoodetailing.com>
+250 Recipient <jason@yootoodetailing.com> OK
+data
+354 Start mail input; end with <CRLF>.<CRLF>
+this is a test. please disregard
+.
+550 permanent failure for one or more recipients (jason@yootoodetailing.com:blocked)
+
