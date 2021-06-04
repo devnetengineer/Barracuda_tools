@@ -1,0 +1,19 @@
+For units experiencing serious load issues or mail is not being filtered due to corrupted spam/virus definition, you may often run into units with high number of 
+messages in the Inbound queue. This is because the appliance is continuing to accept the SMTP connection and is queueing up the emails to be filtered but the appliance is
+not actually able to filter the mail.
+
+Moving the emails from Inbound queue to Outbound queue
+*This is not recommended for the most part, but can be done at the customer's request since this bypasses spam filtering altogether and queues up the mail in the Outbound
+queue for the MTA agent to deliver the message to the mail server
+
+
+
+find /mail/email/ -size +10000k -type f -exec mv {} /mail/email_outbound/maildrop/ \; -print
+
+
+
+*The "-size" parameter can be modified either higher or lower to accomodate the customer's request. All emails over 10MB will inherently take longer to process.
+
+
+
+
