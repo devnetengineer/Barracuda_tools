@@ -1,0 +1,11 @@
+On units that are smaller than Model 300 or any units that are heavily under load, it may be best to completely take the unit offline. If GUI is not accessible,
+the best option is to disable Watchdog and kill the MTA agent and the spam inspection engine:
+
+
+# touch /tmp/nowatchdog
+# killall -9 bsmtpd
+# killall -9 amavisd
+
+This will ensure Watchdog service does not try to restart stopped services (every 5 minutes) and the appliance will stop accepting SMTP connections.
+
+
