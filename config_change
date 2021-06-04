@@ -1,0 +1,41 @@
+Config_change is a utility that interacts directly with the mySQL database. 
+
+The main purpose is to put another abstract layer between the relational database that holds the critical configuration data of the appliance and the admin.
+
+
+1123300@100.69.8.110 ~ # config_read %tls%
+Looking up variables ('%tls%')
++--------+----------------------+---------------------------------+--------+---------+
+| Scope  | Scope Data           | Variable                        | Value  | Deleted |
++--------+----------------------+---------------------------------+--------+---------+
+| global |                      | mta_enable_smtp_tls             | Yes    | 0       |
+| global |                      | mta_force_tls_all_outgoing      | Yes    | 0       |
+| domain | ains-inc.com         | mta_ldap_advanced_tls_mode      | No     | 0       |
+| domain | akronohio.gov        | mta_ldap_advanced_tls_mode      | No     | 0       |
+| global |                      | smtp_allow_tls11                | Yes    | 0       |
++--------+----------------------+---------------------------------+--------+---------+
+
+config_read is able to query to the mySQL database and return the qeuried variable in a tabled format
+
+1123300@100.69.8.110 ~ # config_change smtp_allow_tls11 
+Updating smtp_allow_tls11 for global
+Affected 1 rows
+1123300@100.69.8.110 ~ # config_read smtp_allow_tls11 No
+Looking up variables ('smtp_allow_tls11')
++--------+------------+------------------+-------+---------+
+| Scope  | Scope Data | Variable         | Value | Deleted |
++--------+------------+------------------+-------+---------+
+| global |            | smtp_allow_tls11 | No    | 0       |
++--------+------------+------------------+-------+---------+
+1123300@100.69.8.110 ~ # config_change smtp_allow_tls11 Yes
+Updating smtp_allow_tls11 for global
+Affected 1 rows
+1123300@100.69.8.110 ~ # config_read smtp_allow_tls11
+Looking up variables ('smtp_allow_tls11')
++--------+------------+------------------+-------+---------+
+| Scope  | Scope Data | Variable         | Value | Deleted |
++--------+------------+------------------+-------+---------+
+| global |            | smtp_allow_tls11 | Yes   | 0       |
++--------+------------+------------------+-------+---------+
+
+config_change is able to actually change the value of the variable, without accessing the mySQL database
